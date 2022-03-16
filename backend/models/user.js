@@ -25,6 +25,12 @@ module.exports = (sequelize, DataTypes) => {
         notEmpty: { msg: 'Name must not be empty' },
       },
     },
+    avatar: {
+      type: DataTypes.STRING,
+    },
+    bio: {
+      type: DataTypes.STRING,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,

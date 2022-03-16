@@ -8,13 +8,24 @@ module.exports = {
         primaryKey: true,
         type: DataTypes.INTEGER,
       },
-      body: {
+      title: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      content: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      imageURL:{
+        type: DataTypes.STRING,
       },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+					model: 'User',
+					key: 'id'
+				}
       },
       createdAt: {
         allowNull: false,

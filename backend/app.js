@@ -6,6 +6,7 @@ const app = express();
 const path= require('path');
 //Enregistrement des routeurs
 const userRoutes = require('./routes/user-routes');
+const postRoutes = require('./routes/post-routes');
 
 //Importation des models
 const { sequelize, User, Post } = require("./models");
@@ -26,6 +27,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 
 //Enregistrement du routeur pour toutes les demandes effectuées
 app.use('/api/auth', userRoutes);
+app.use('/api/post', postRoutes);
 
 //Exportation vers les autres fichiers pour l'accès d'express 
 module.exports = app;

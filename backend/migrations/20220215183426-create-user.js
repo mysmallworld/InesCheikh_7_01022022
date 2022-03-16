@@ -11,6 +11,12 @@ module.exports = {
       username: {
         type: DataTypes.STRING,
       },
+      avatar: {
+        type: DataTypes.STRING,
+      },
+      bio: {
+        type: DataTypes.STRING,
+      },
       email: {
         type: DataTypes.STRING,
       },

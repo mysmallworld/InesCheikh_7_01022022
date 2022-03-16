@@ -1,3 +1,5 @@
+//Importing fs to manage file
+const fs = require('fs');
 //Importing bcrypt to hash the password
 const bcrypt = require('bcrypt');
 //Importing crypto-js to encrypt email
@@ -16,20 +18,24 @@ exports.signup = async (req, res) => {
     const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.CRYPTOJS_RANDOM_SECRET_KEY}`).toString(cryptojs.enc.Base64);
 
     let username = req.body.username;
+    let avatar = `${req.protocol}://${req.get('host')}/images/avatar.png`;
+    let bio = req.body.bio;
     bcrypt.hash(req.body.password, 10).then(hash => {
 
         console.log("hash", hash);
         model.User.create({
             username: username,
+            avatar: avatar,
+            bio: bio,
             email: emailCryptoJs,
             password: hash,
             admin: false,
         })
-        .then(result => { res.status(201).json({ message: "L'utilisateur a bien été créé !" }) })
-        .catch(error => {
-            console.log(error)
-            return res.status(500).json({ message: error.message })
-        });
+            .then(result => { res.status(201).json({ message: "L'utilisateur a bien été créé !" }) })
+            .catch(error => {
+                console.log(error)
+                return res.status(500).json({ message: error.message })
+            });
     }).catch(error => {
         console.log(error)
         return res.status(500).json({ message: error.message })
@@ -60,7 +66,7 @@ exports.login = async (req, res) => {
 //Function to presents all users
 exports.getUser = (req, res) => {
     model.User.findAll({
-        attributes: ["id", "username", "email", "admin", "createdAt"],
+        attributes: ["id", "username", "avatar", "bio", "email", "admin", "createdAt"],
     })
         .then((users) => {
             if (users) {
@@ -90,17 +96,23 @@ exports.updateUser = (req, res) => {
     })
         .then(user => {
             if (admin || user.id == userId) {
-                const userObject = req.file ?
-                    {
-                        username: user.username
-                    } :
-                    {
-                        ...req.body
-                    };
-                delete userObject.userId;
+
+                const avatar = user.avatar;
+                if (req.file != undefined) {
+                    avatar = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+                }
+                const userObject = {
+                    username: username,
+                    avatar: avatar,
+                    bio: bio,
+                    email: user.email,
+                    password: user.password,
+                    admin: user.admin
+                }
+
                 model.User.update(userObject, { where: { id: req.params.id } })
                     .then(() => {
-                        res.status(200).json({ message: "L'utilisateur a bien été mis à jour !", username: userObject.username })
+                        res.status(200).json({ message: "L'utilisateur a bien été mis à jour !", username: userObject.username, bio: userObject.bio})
                     })
                     .catch((error) => {
                         console.error(error.message);
@@ -130,12 +142,31 @@ exports.deleteUser = (req, res) => {
     })
         .then((user) => {
             if (admin || user.id == userId) {
-                user.destroy()
-                    .then(() => {
-                        res.status(200).json({ message: "L'utilisateur a bien été supprimé !" })
-                    }).catch((error) => {
-                        res.status(400).json({ message: "L'utilisateur n'a pas été supprimé !" })
-                    });
+                let isdeleted = false;
+                if (user.avatar) {
+                    const filename = user.avatar.split('/images/')[1];
+                    if (filename != "avatar.png") {
+                        fs.unlink(`images/${filename}`, () => {
+                            console.log("image supprimée");
+                            isdeleted = true;
+                        })
+                    }
+                    else {
+                        //no avatar no deletion
+                        isdeleted = true;
+                    }
+                }
+                if (isdeleted) {
+                    user.destroy()
+                        .then(() => {
+                            res.status(200).json({ message: "L'utilisateur a bien été supprimé !" })
+                        }).catch((error) => {
+                            res.status(400).json({ message: "L'utilisateur n'a pas été supprimé !" })
+                        });
+                }
+                else {
+                    res.status(400).json({ message: "L'avatar n'a pas été supprimé !" })
+                }
             }
             else {
                 res.status(403).json({ message: "Action non autorisée !" })
