@@ -1,30 +1,40 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
-    path: '/',
+    path: '/signup',
     name: 'signup',
-    component: () => import('../components/user-signup.vue'),
+    component: () => import('../views/user-signup.vue'),
   },
   {
-    path: '/login',
+    path: '/',
     name: 'login',
-    component: () => import('../components/user-login.vue'),
+    component: () => import('../views/user-login.vue'),
   },
   {
     path: '/profil',
     name: 'profil',
-    component: () => import('../components/user-profil.vue'),
+    component: () => import('../views/user-profil.vue'),
   },
   {
     path: '/home',
     name: 'home',
-    component: () => import('../components/user-home.vue'),
+    component: () => import('../views/user-home.vue'),
+  },
+  {
+    path: '/posts',
+    name: 'posts',
+    component: () => import('../views/new-post.vue'),
+  },
+  {
+    path: '/edit',
+    name: 'edit',
+    component: () => import('../views/user-edit-profil.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
 })
 

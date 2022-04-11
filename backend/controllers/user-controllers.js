@@ -3,7 +3,7 @@ const fs = require('fs');
 //Importing bcrypt to hash the password
 const bcrypt = require('bcrypt');
 //Importing crypto-js to encrypt email
-const cryptojs = require('crypto-js');
+const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
 //Importing the package to use environment variables
 const dotenv = require('dotenv');
@@ -11,22 +11,55 @@ const result = dotenv.config();
 //Importing models
 const model = require('../models');
 
+//Crypto-js
+//Password
+var password = process.env.EMAIL_SECRET_TOKEN;
+// Secret key pour l'email
+var key = process.env.KEY;
+// Initialisation vecteur
+var iv = process.env.IV;
+//Salt
+var salt = process.env.IV;
+//Encrypt email
+const encryptEmail = (string) => {
+  const encrypted = CryptoJS.AES.encrypt(string, key, { 
+      iv: iv, 
+      padding: CryptoJS.pad.Pkcs7,
+      mode: CryptoJS.mode.CBC
+    })
+  var transitmessage = salt.toString()+ iv.toString() + encrypted.toString();
+  return transitmessage;
+};
+//Decrypt email
+//Il faudra afficher ensuite decrypted.toString(CryptoJS.enc.Utf8)
+const decryptEmail = (transitmessage) => {
+    //var salt = CryptoJS.enc.Hex.parse(transitmessage.substr(0, 32));
+    var iv = CryptoJS.enc.Hex.parse(transitmessage.substr(32, 32));
+    var encrypted = transitmessage.substring(64);
+    const decrypted = CryptoJS.AES.decrypt(encrypted, key, { 
+        iv: iv, 
+        padding: CryptoJS.pad.Pkcs7,
+        mode: CryptoJS.mode.CBC
+    });
+    return decrypted
+};
+
 //Function to register a new user
 exports.signup = async (req, res) => {
 
     console.log(JSON.stringify(req.body));
-    const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.CRYPTOJS_RANDOM_SECRET_KEY}`).toString(cryptojs.enc.Base64);
-
-    let username = req.body.username;
+    //const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.KEY_EMAIL}`).toString(cryptojs.enc.Base64);
+    const emailCryptoJs = encryptEmail(req.body.email);
+    let firstname = req.body.firstname;
+    let lastname = req.body.lastname;
     let avatar = `${req.protocol}://${req.get('host')}/images/avatar.png`;
-    let bio = req.body.bio;
     bcrypt.hash(req.body.password, 10).then(hash => {
 
         console.log("hash", hash);
         model.User.create({
-            username: username,
+            firstname: firstname,
+            lastname: lastname,
             avatar: avatar,
-            bio: bio,
             email: emailCryptoJs,
             password: hash,
             admin: false,
@@ -45,15 +78,15 @@ exports.signup = async (req, res) => {
 //Function to connect user existants
 exports.login = async (req, res) => {
 
-    const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.CRYPTOJS_RANDOM_SECRET_KEY}`).toString(cryptojs.enc.Base64);
-
+    //const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.KEY_EMAIL}`).toString(cryptojs.enc.Base64);
+    const emailCryptoJs = encryptEmail(req.body.email);
     const user = await model.User.findOne({
         where: { email: emailCryptoJs }
     });
     if (user) {
         const valid = await bcrypt.compare(req.body.password, user.password);
         if (valid) {
-            token = jwt.sign({ "id": user.id, "email": user.email, "username": user.username, "admin": user.admin }, process.env.RANDOM_TOKEN_SECRET), { expireIn: '24h' };
+            token = jwt.sign({ "id": user.id, "email": user.email, "firstname": user.firstname, "lastname": user.lastname, "admin": user.admin }, process.env.RANDOM_TOKEN_SECRET), { expireIn: '24h' };
             res.status(200).json({ message: "Utilisateur connecté !", "id": user.id, token });
         } else {
             res.status(400).json({ message: "Mot de passe incorrect !" });
@@ -65,14 +98,21 @@ exports.login = async (req, res) => {
 
 //Function to presents all users
 exports.getUser = (req, res) => {
-    model.User.findAll({
-        attributes: ["id", "username", "avatar", "bio", "email", "admin", "createdAt"],
+
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_SECRET);
+    const userId = decodedToken.id;
+    const admin = decodedToken.admin;
+
+    model.User.findOne({
+        where: { id: userId },
+        attributes: ["id", "firstname", "lastname", "avatar", "bio", "email", "admin", "createdAt"],
     })
-        .then((users) => {
-            if (users) {
+        .then((user) => {
+            if (user) {
                 res
                     .status(200)
-                    .json({ message: "Utilisateur trouvé !", users });
+                    .json({ message: "Utilisateur trouvé !", user: { avatar: user.avatar, firstname: user.firstname, lastname: user.lastname, email: decryptEmail(user.email), bio: user.bio} });
             } else {
                 return res.status(404).json({ message: "Utilisateur introuvable !" });
             }
@@ -88,13 +128,16 @@ exports.updateUser = (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_SECRET);
-    const userId = decodedToken.userId;
+    const userId = decodedToken.id;
     const admin = decodedToken.admin;
 
+    console.log(JSON.stringify(req.body));
     model.User.findOne({
         where: { id: req.params.id }
     })
         .then(user => {
+            console.log(admin);
+            console.log(user.id + "/" + userId);
             if (admin || user.id == userId) {
 
                 const avatar = user.avatar;
@@ -102,9 +145,10 @@ exports.updateUser = (req, res) => {
                     avatar = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
                 }
                 const userObject = {
-                    username: username,
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname,
                     avatar: avatar,
-                    bio: bio,
+                    bio: req.body.bio,
                     email: user.email,
                     password: user.password,
                     admin: user.admin
@@ -112,7 +156,7 @@ exports.updateUser = (req, res) => {
 
                 model.User.update(userObject, { where: { id: req.params.id } })
                     .then(() => {
-                        res.status(200).json({ message: "L'utilisateur a bien été mis à jour !", username: userObject.username, bio: userObject.bio})
+                        res.status(200).json({ message: "L'utilisateur a bien été mis à jour !", firstname: userObject.firstname, lastname: userObject.lastname, bio: userObject.bio })
                     })
                     .catch((error) => {
                         console.error(error.message);
@@ -134,7 +178,7 @@ exports.deleteUser = (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_SECRET);
-    const userId = decodedToken.userId;
+    const userId = decodedToken.id;
     const admin = decodedToken.admin;
 
     model.User.findOne({

@@ -7,31 +7,44 @@ const result = dotenv.config();
 const model = require('../models');
 
 exports.createPost = async (req, res) => {
-    const title = req.body.title;
-    const content = req.body.content;
-    const imageURL = `${req.protocol}://${req.get('host')}/images/avatar.png`;
-    const token = req.headers.authorization.split(' ')[1];
+    
+	const token = req.headers.authorization.split(' ')[1];
     const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_SECRET);
-    const userId = decodedToken.userId;
-
-    model.User.findOne({
-        where: { id: req.params.id }
-    })
-        .then(user => {
-            if (admin || user.id == userId) {
-
-                const postObject = {
-                    userId: id,
-                    title: title,
-                    content: content,
-                    imageURL: imageURL,
-                }
-    model.Post.create(postObject , { where: { id: req.params.id } })}})
-    .then(res => { res.status(201).json({ message: "Le post a bien été créé !" }) })
-    .catch(error => {
-        console.log(error)
-        return res.status(500).json({ message: error.message })
-    });
+    const userId = decodedToken.id;
+    
+	let imageUrl;
+	try {
+		const user = await model.User.findOne({
+			attributes: [ 'firstName','lastName', 'id', 'avatar' ],
+			where: { id: userId }
+		});
+       
+		if (user !== null) {
+			if (req.file) {
+				imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+			} 
+            
+			const post =  model.Post.create({
+				include: [
+					{
+						model: model.User,
+						attributes: [ 'firstname','lastname', 'id', 'avatar' ]
+					}
+				],
+				content: req.body.content || '',
+				title: req.body.title || '',
+				imageURL: imageUrl || '',
+				userId: user.id
+			})
+			.then((response)=>res.status(200).json( {"post" : response , message:"Publication postée !"}))
+            .catch( error => {res.status(500).json({ message: error.message });});
+			
+		} else {
+			res.status(404).json({ message: "Post introuvable !" });
+		}
+	} catch (error) {
+		return res.status(500).json({message: error.message});
+	}
 };
 
 exports.getOnePost = async (req, res) => {
@@ -69,9 +82,92 @@ exports.getAllPost = async (req, res) => {
 };
 
 exports.updatePost = async (req, res) => {
-
+    try {
+		let newImageUrl;
+		const token = req.headers.authorization.split(' ')[1];
+    	const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_SECRET);
+    	const userId = decodedToken.id;
+		console.log(userId);
+		
+		let post = await model.Post.findOne({ where: { id: req.params.id} });
+		
+		console.log(JSON.stringify(post));
+		if (userId === post.userId) {
+			if (req.file) {
+				newImageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+				console.log(newImageUrl);
+				if (post.imageUrl) {
+					const filename = post.imageUrl.split('/images')[1];
+					fs.unlink(`images/${filename}`, (err) => {
+						if (err) console.log(err);
+						else {
+							console.log(`Deleted file: images/${filename}`);
+						}
+					});
+				}
+			}
+			if(!req.file && req.body.deleteImage =="true")
+			{
+				newImageUrl = '';
+				if (post.imageUrl) {
+					const filename = post.imageUrl.split('/images')[1];
+					fs.unlink(`images/${filename}`, (err) => {
+						if (err) console.log(err);
+						else {
+							console.log(`Deleted file: images/${filename}`);
+						}
+					});
+				}
+			}
+			post.content = req.body.content;
+			post.title = req.body.title;
+			post.imageURL = newImageUrl;
+            
+			const newPost = await post.update({
+				fields: [ 'content', 'title', 'imageURL' ]
+			})
+			.then( (response) => { 
+				post.save().res.status(200).send( {"post" : response , message: "Ce post a bien été modifié !"})
+			})
+            .catch( error => {res.status(500).send({ error: error });});
+			
+		} else {
+			res.status(400).json({ message: "Vous n'êtes pas authorisé à modifier ce post !" });
+		}
+	} catch (error) {
+		return res.status(500).send({ message: error.message });
+	}
 };
 
 exports.deletePost = async (req, res) => {
+    try {
+		const token = req.headers.authorization.split(' ')[1];
+    	const decodedToken = jwt.verify(token, process.env.RANDOM_TOKEN_SECRET);
+    	const userId = decodedToken.id;
 
+		const checkAdmin = await model.User.findOne({ where: { id: userId } });
+		const post = await model.Post.findOne({ where: { id: req.params.id } });
+		let UserId = await model.User.findOne({
+			attributes: [ 'firstName','lastName', 'id', 'avatar' ],
+			where: { id: userId }
+		});
+		console.log(UserId);
+
+		if (userId === post.UserId || checkAdmin.admin === true) {
+			if (post.imageUrl) {
+				const filename = post.imageUrl.split('/images')[1];
+				fs.unlink(`images/${filename}`, () => {	
+				});
+			} 
+            model.Post.destroy({ where: { id: post.id } })
+			.then(()=> res.status(200).json({ message: 'Ce post a bien été spprimé !' }))
+			.catch((error)=> res.status(500).json({ message: error.message }))
+		    
+
+		} else {
+			res.status(400).json({ message: "Vous n'êtes pas authorisé à supprimer ce post !" });
+		}
+	} catch (error) {
+		return res.status(500).send({ message: error.message });
+	}
 };
