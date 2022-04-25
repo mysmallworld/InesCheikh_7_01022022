@@ -34,7 +34,6 @@
 <script>
 
 export default {
-    name: 'home-nav',
     methods: {
       logout() {
         this.$store.dispatch('LOGOUT', this.user)

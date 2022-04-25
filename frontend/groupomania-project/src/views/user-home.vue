@@ -1,17 +1,20 @@
 <template>
 <div class="home">
   <!-- Header -->
-    <Nav/>
+    <HomeNav/>
+    <AllPosts/>
 </div>
 </template>
 
 <script>
-import Nav from '../components/home-nav.vue'
+import HomeNav from '../components/home-nav.vue'
+import AllPosts from '../components/all-posts.vue'
 
-  export default {
+export default {
     name: 'user-home',
     components: {
-      Nav
+      HomeNav,
+      AllPosts,
     },
-  }
+}
 </script>

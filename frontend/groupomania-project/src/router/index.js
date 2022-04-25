@@ -24,12 +24,22 @@ const routes = [
   {
     path: '/posts',
     name: 'posts',
-    component: () => import('../views/new-post.vue'),
+    component: () => import('../components/new-post.vue'),
   },
   {
     path: '/edit',
     name: 'edit',
-    component: () => import('../views/user-edit-profil.vue')
+    component: () => import('../components/edit-profil.vue')
+  },
+  {
+    path: '/updatePost',
+    name: 'updatePost',
+    component: () => import('../components/update-post.vue')
+  },
+  {
+    path: '/',
+    name: 'commentPost',
+    component: () => import('../components/new-comment.vue')
   }
 ]
 

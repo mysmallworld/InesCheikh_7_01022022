@@ -11,6 +11,10 @@
         <div class="card-body text-center mx-5">
           <!-- Form -->
           <form @submit.prevent="connect()">
+            <div v-if="user.error" class="alert alert-danger py-3" role="alert">
+              {{user.error}}
+            </div>
+
             <div class="input-group d-flex flex-align-item mt-4 mb-3">
               <span class="input-group-text" id="basic-addon1"><i class="bi bi-envelope"></i></span>
               <input type="email" class="form-control" v-model="user.email" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="email@mail.com">
@@ -49,13 +53,14 @@
 </template>
 
 <script>
-
 export default {
   data : () => ({
       user : {
         email: '',
-        password: ''
-      }
+        password: '',
+        error: ''
+      },
+      
   }),
 
   methods: {
@@ -64,7 +69,7 @@ export default {
         .then ((res) => { console.log(res);
         this.$router.push({name: 'profil'});
         })
-        .catch((error) => {error, alert("Une erreur est survenue, veuillez vérifier l'email et le mot de passe!")})
+        .catch((error) => {error})
     }
   }
 }

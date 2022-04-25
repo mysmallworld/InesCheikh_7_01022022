@@ -16,16 +16,16 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      imageURL:{
+      imageURL: {
         type: DataTypes.STRING,
       },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-					model: 'users',
-					key: 'id'
-				}
+          model: 'users',
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,

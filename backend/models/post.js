@@ -1,53 +1,43 @@
 'use strict'
 const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Post extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate({ User}) {
-      // define association here
-      // userId
-      this.belongsTo(User, { foreignKey: 'userId', as: 'user' , onDelete:'CASCADE'})
-    }
 
-    toJSON() {
-      return { ...this.get(), id: undefined, userId: undefined }
-    }
-  }
-  Post.init(
-    {
-      title: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: 'Post must have a title'},
-          notEmpty: { msg: 'Title must not be empty' }
-        },
+module.exports = (sequelize, DataTypes) => {
+  const Post = sequelize.define('Post', {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: { msg: 'Post must have a title' },
+        notEmpty: { msg: 'Title must not be empty' }
       },
-      content: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: 'Post must have a content' },
-          notEmpty: { msg: 'Content must not be empty' },
-        },
-      },
-      imageURL: {
-        type: DataTypes.STRING,
-      },
-      userId:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      }
     },
-    {
-      sequelize,
-      tableName: 'posts',
-      modelName: 'Post',
-    }
-  )
-  return Post
+    content: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notNull: { msg: 'Post must have a content' },
+        notEmpty: { msg: 'Content must not be empty' },
+      },
+    },
+    imageURL: {
+      type: DataTypes.STRING,
+    },
+    userId: DataTypes.INTEGER,
+  })
+
+  Post.associate = (models) => {
+    // associations can be defined here
+
+    models.Post.belongsTo(models.User, {
+      foreignKey: {
+        allowNull: false,
+      }, onDelete: 'CASCADE'
+    });
+
+    //  models.Post.hasMany(models.Comment);
+    //  models.Post.hasMany(models.Like);
+    // models.Post.hasMany(models.Dislike);
+  };
+
+  return Post;
 }

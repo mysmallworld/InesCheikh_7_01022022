@@ -7,9 +7,10 @@ const path= require('path');
 //Enregistrement des routeurs
 const userRoutes = require('./routes/user-routes');
 const postRoutes = require('./routes/post-routes');
+const commentRoutes = require('./routes/comment-routes');
 
 //Importation des models
-const { sequelize, User, Post } = require("./models");
+const { sequelize, User, Post, Comment } = require("./models");
 
 //Mise en place des requête POST
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 //Enregistrement du routeur pour toutes les demandes effectuées
 app.use('/api/auth', userRoutes);
 app.use('/api/post', postRoutes);
+app.use('/api/comment', commentRoutes);
 
 //Exportation vers les autres fichiers pour l'accès d'express 
 module.exports = app;

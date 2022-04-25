@@ -11,6 +11,16 @@
           <div class="card-body text-center mx-5">
             <!-- Form -->
             <form @submit.prevent="signup()">
+              <div class="alert alert-danger py-3 text-center" role="alert" v-if="error">
+                {{error}}
+              </div>
+              <div class="alert alert-success py-3 text-center" role="alert" v-if="success">
+                {{success}}
+                <div class="d-flex justify-content-center mt-2">
+                  <button type="submit" class="btn btn-success font-btn" @click="btnConnect">Connexion</button>
+                </div>
+              </div>
+
               <div class="d-flex justify-content-center">
               <img src="http://localhost:3000/images/avatar.png" alt="avatar" class="w-50 w-md-25 mb-3"/>
             </div>
@@ -60,6 +70,7 @@
 </template>
 
 <script>
+import axios from "axios"
 
 export default {
   data : () => ({
@@ -68,17 +79,28 @@ export default {
       lastname:'',
       email: '',
       password: '',
-    }
+    },
+    success:'',
+    error:'',
 }),
 
   methods: {
       signup() {
-        this.$store.dispatch('USER_SIGNUP', this.newUser)
-        .then((res) => {console.log(res);
-          this.$router.push({name: 'profil'});
-        })
-        .catch((error) => {error, alert("Une erreur est survenue, chaque utilisateur doit avoir un nom unique !")})
-    }
+        axios
+          .post("http://localhost:3000/api/auth/signup", this.newUser, {
+              headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+          })
+          .then((res) => {
+          this.success = "Votre compte a bien été créé ! Vous pouvez désormais vous connecter !"
+          console.log(res);
+          })
+          .catch((error) => { 
+            this.error = "Une erreur est survenue, chaque utilisateur doit avoir un nom unique !"
+            console.log(error)})
+      },
+      btnConnect() {
+        this.$router.push({name: 'login'});
+      }
   }
 }
 </script>

@@ -11,44 +11,38 @@ const result = dotenv.config();
 //Importing models
 const model = require('../models');
 
-//Crypto-js
-//Password
-var password = process.env.EMAIL_SECRET_TOKEN;
-// Secret key pour l'email
-var key = process.env.KEY;
-// Initialisation vecteur
-var iv = process.env.IV;
-//Salt
-var salt = process.env.IV;
-//Encrypt email
-const encryptEmail = (string) => {
-  const encrypted = CryptoJS.AES.encrypt(string, key, { 
-      iv: iv, 
-      padding: CryptoJS.pad.Pkcs7,
-      mode: CryptoJS.mode.CBC
-    })
-  var transitmessage = salt.toString()+ iv.toString() + encrypted.toString();
-  return transitmessage;
-};
-//Decrypt email
-//Il faudra afficher ensuite decrypted.toString(CryptoJS.enc.Utf8)
-const decryptEmail = (transitmessage) => {
-    //var salt = CryptoJS.enc.Hex.parse(transitmessage.substr(0, 32));
-    var iv = CryptoJS.enc.Hex.parse(transitmessage.substr(32, 32));
-    var encrypted = transitmessage.substring(64);
-    const decrypted = CryptoJS.AES.decrypt(encrypted, key, { 
-        iv: iv, 
+//Function encrypt email
+const encryptEmail = email => {
+
+    const pass = process.env.CRYPTOJS_KEY;
+    const key = CryptoJS.enc.Utf8.parse(pass);
+
+    const encrypted = CryptoJS.AES.encrypt(email, key, {
+        mode: CryptoJS.mode.ECB,
         padding: CryptoJS.pad.Pkcs7,
-        mode: CryptoJS.mode.CBC
     });
-    return decrypted
-};
+
+    return encrypted.toString();
+}
+
+//Function decrypt email
+const decryptEmail = string => {
+
+    const pass = process.env.CRYPTOJS_KEY;
+    const key = CryptoJS.enc.Utf8.parse(pass);
+
+    const decrypted = CryptoJS.AES.decrypt(string, key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7,
+    });
+        
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}
 
 //Function to register a new user
 exports.signup = async (req, res) => {
 
     console.log(JSON.stringify(req.body));
-    //const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.KEY_EMAIL}`).toString(cryptojs.enc.Base64);
     const emailCryptoJs = encryptEmail(req.body.email);
     let firstname = req.body.firstname;
     let lastname = req.body.lastname;
@@ -78,7 +72,6 @@ exports.signup = async (req, res) => {
 //Function to connect user existants
 exports.login = async (req, res) => {
 
-    //const emailCryptoJs = cryptojs.HmacSHA512(req.body.email, `${process.env.KEY_EMAIL}`).toString(cryptojs.enc.Base64);
     const emailCryptoJs = encryptEmail(req.body.email);
     const user = await model.User.findOne({
         where: { email: emailCryptoJs }
@@ -140,7 +133,7 @@ exports.updateUser = (req, res) => {
             console.log(user.id + "/" + userId);
             if (admin || user.id == userId) {
 
-                const avatar = user.avatar;
+                let avatar = user.avatar;
                 if (req.file != undefined) {
                     avatar = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
                 }
