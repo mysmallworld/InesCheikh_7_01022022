@@ -61,7 +61,7 @@
         </div>
         <!-- Comments -->
         <div class="comments">
-            <div class="pt-3 pb-1" v-for="comment in posts.Comments" v-bind:key="comment.id" :postId="post.id">
+            <div class="pt-3 pb-1" v-for="comment in post.Comments" :key="comment.id">
             <div class="d-flex flex-row me-2">
                 <img :src="comment.User.avatar" alt="avatar" class="img-fluid border rounded-circle comment-avatar"/>
             <div class="card w-100 comment-card ms-1 px-1">
@@ -75,8 +75,8 @@
             </div>
             </div>
             <div class="d-flex flex-row" v-if="comment.User.lastname == user.lastname || user.admin == true">
-                <a class="ms-5 comment-update" @click="updateComment(comment)">modifier</a>
-                <a class="mx-2 comment-delete" @click="deleteComment(comment)">supprimer</a>
+                <a class="ms-5 comment-update" @click="updateComment(comment, postId)">modifier</a>
+                <a class="mx-2 comment-delete" @click="deleteComment(comment, postId)">supprimer</a>
                 <p class="ms-2 fs-6 comment-time">{{dateFromNow(comment.createdAt, comment.updatedAt)}}</p>
             </div>
             <div v-else>
