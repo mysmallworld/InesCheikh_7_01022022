@@ -52,12 +52,12 @@
              <div class="position-relative w-100 d-flex flex-row">
                 <textarea v-model="comment.comment" placeholder="Écrivez un commentaire..." 
                 class="form-control border rounded-pill comment-textarea overflow-auto"></textarea>
-                <i class="bi bi-send-check position-absolute end-0 pe-2 py-2 comment-send" @click="postedComment(comment)"></i>
+                <i class="bi bi-send-check position-absolute end-0 pe-2 py-2 comment-send" @click="postedComment(comment, post.id)"></i>
             </div>
             </div>
         </div>
         <div class="comments">
-            <div class="pt-3 pb-1" v-for="comment in posts" v-bind:key="comment.id" :postId="post.id">
+            <div class="pt-3 pb-1" v-for="comment in post.Comments" :key="comment.id">
             <div class="d-flex flex-row me-2">
                 <img :src="comment.User.avatar" alt="avatar" class="img-fluid border rounded-circle comment-avatar"/>
             <div class="card w-100 comment-card ms-1 px-1">
@@ -67,16 +67,16 @@
                 </div>
                 <textarea class="px-2 comment-card" v-model="comment.comment" 
                 v-if="comment.User.lastname == user.lastname || user.admin == true"></textarea>
-                <p class="px-2 comment-card" v-else>{{omment.comment}}</p>
+                <p class="px-2 comment-card" v-else>{{comment.comment}}</p>
             </div>
             </div>
             <div class="d-flex flex-row" v-if="comment.User.lastname == user.lastname || user.admin == true">
-                <a class="ms-5 comment-update" @click="updateComment(comment)">modifier</a>
-                <a class="mx-2 comment-delete" @click="deleteComment(comment)">supprimer</a>
-                <p class="ms-2 fs-6 comment-time">{{dateTime(comment.createdAt, comment.updatedAt)}}</p>
+                <a class="ms-5 comment-update" @click="updateComment(comment, postId)">modifier</a>
+                <a class="mx-2 comment-delete" @click="deleteComment(comment, postId)">supprimer</a>
+                <p class="ms-2 fs-6 comment-time">{{dateFromNow(comment.createdAt, comment.updatedAt)}}</p>
             </div>
             <div v-else>
-                <p class="ms-5 fs-6 comment-time">{{dateTime(comment.createdAt, comment.updatedAt)}}</p>
+                <p class="ms-5 fs-6 comment-time">{{dateFromNow(comment.createdAt, comment.updatedAt)}}</p>
             </div>
         </div>
         </div>        
@@ -96,7 +96,6 @@ export default {
       return {
           user: "",
           posts:[],
-          Comments:[],
           comment: { 
                 comment:'',
             },
@@ -125,11 +124,12 @@ methods: {
         if(updatedAt != createdAt)return `Modifié le ${moment(updatedAt).format('D MMMM YYYY, LT')}`
         else return moment(createdAt).format('D MMMM YYYY, LT');
     },
-     postedComment() {
+     postedComment(comm, idpub) {
+         console.log(comm.comment)
+        console.log(idpub)
         let fd = new FormData();
-        fd.append('comment', this.comment),
-        fd.append('postId', this.postId),
-        console.log(this.postId)
+        fd.append('comment', comm.comment);
+        fd.append('postId', idpub);
     axios
         .post("http://localhost:3000/api/comment/", fd, {
                 headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
@@ -138,7 +138,7 @@ methods: {
             this.$router.go()))
             .catch((err) => console.log(err));
         },
-    date(createdAt, updatedAt) {   
+    dateFromNow(createdAt, updatedAt) {   
         moment.locale('fr')
         if(updatedAt != createdAt) return `Mise à jour ${moment(updatedAt).fromNow()}`; 
         else return moment(createdAt).fromNow();    

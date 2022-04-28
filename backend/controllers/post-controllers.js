@@ -247,7 +247,7 @@ exports.deletePost = async (req, res) => {
 
 		if (userId === post.userId || checkAdmin.admin === true) {
 			if (post.imageUrl) {
-				const filename = post.imageUrl.split('/images')[1];
+				const filename = post.imageUrl.split('/images/')[1];
 				fs.unlink(`images/${filename}`, () => {
 				});
 			}

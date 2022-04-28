@@ -19,7 +19,7 @@
                 <ul class="dropdown-menu rounded shadow-sm border-light text-center">
                     <li><a class="dropdown-item rounded font-btn btn-post-update">
                         <router-link :to=" {name: 'updatePost', params:{id:post.id}}">Modifier le post</router-link></a></li>
-                    <li><a class="dropdown-item rounded font-btn btn-post-delete" @click="deletePost(post)">Supprimer le post</a></li>
+                    <li><a class="dropdown-item rounded font-btn btn-post-delete" @click="deletePost(post, post.id)">Supprimer le post</a></li>
                 </ul>
             </div>
         </div>
@@ -28,13 +28,13 @@
             <h2 class="py-2 px-4 fs-4">{{post.content}}</h2>
         <div class="d-flex flex-row bd-highlight">
         <div class="card-body d-flex flex-row border-bottom p-0 col">
-            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-if="post.Likes !== null">{{post.Likes}}</i>
-            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike" v-if="post.Dislikes !== null">{{post.Dislikes}}</i>
+            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-if="post.Likes != 0">{{post.Likes}}</i>
+            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike" v-if="post.Dislikes != 0">{{post.Dislikes}}</i>
        </div>
         <!-- Likes/Comment/Dislikes -->
         </div>
         <div class="d-flex flex-row col border-bottom">
-            <div class="d-flex justify-content-center rounded col w-100 py-2 likes-btn" @click="likePost">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 likes-btn" @click="likePost(post, post.id)">
             <i class="bi bi-hand-thumbs-up mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">J'aime</p>
             </div>
@@ -42,7 +42,7 @@
             <i class="bi bi-chat-dots mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">Commenter</p>
             </div>
-            <div class="d-flex justify-content-center rounded col w-100 py-2 dislikes-btn" @click="dislikePost">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 dislikes-btn" @click="dislikePost(post, post.id)">
             <i class="bi bi-hand-thumbs-down mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">Je n'aime pas</p>
             </div>
@@ -139,8 +139,8 @@ methods: {
     },
 
     postedComment(comm, idpub) {
-          console.log(comm.comment)
-            console.log(idpub)
+        console.log(comm.comment)
+        console.log(idpub)
         let fd = new FormData();
         fd.append('comment', comm.comment);
         fd.append('postId', idpub);
@@ -187,7 +187,7 @@ methods: {
          .post("http://localhost:3000/api/post/" +post.id+ "/likes", {
                 headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
             })
-            .then((response) => (this.post.Likes = response.data.post.Likes,
+            .then((response) => (this.Likes = response.data.Likes,
             this.$router.go()))
             .catch((err) => console.log(err));
     },
