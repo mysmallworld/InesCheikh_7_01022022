@@ -1,3 +1,5 @@
+//Importing fs to manage file
+const fs = require('fs');
 const bcrypt = require('bcrypt');
 const cryptojs = require('crypto-js');
 const jwt = require('jsonwebtoken');

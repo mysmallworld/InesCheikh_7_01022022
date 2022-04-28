@@ -35,7 +35,7 @@ const decryptEmail = string => {
         mode: CryptoJS.mode.ECB,
         padding: CryptoJS.pad.Pkcs7,
     });
-        
+
     return decrypted.toString(CryptoJS.enc.Utf8);
 }
 
@@ -105,7 +105,7 @@ exports.getUser = (req, res) => {
             if (user) {
                 res
                     .status(200)
-                    .json({ message: "Utilisateur trouvé !", user: { avatar: user.avatar, firstname: user.firstname, lastname: user.lastname, email: decryptEmail(user.email), bio: user.bio} });
+                    .json({ message: "Utilisateur trouvé !", user: { avatar: user.avatar, firstname: user.firstname, lastname: user.lastname, email: decryptEmail(user.email), bio: user.bio } });
             } else {
                 return res.status(404).json({ message: "Utilisateur introuvable !" });
             }
@@ -179,31 +179,25 @@ exports.deleteUser = (req, res) => {
     })
         .then((user) => {
             if (admin || user.id == userId) {
-                let isdeleted = false;
+
                 if (user.avatar) {
                     const filename = user.avatar.split('/images/')[1];
-                    if (filename != "avatar.png") {
+                    if (filename !== "avatar.png") {
                         fs.unlink(`images/${filename}`, () => {
                             console.log("image supprimée");
-                            isdeleted = true;
-                        })
+
+                        });
                     }
-                    else {
-                        //no avatar no deletion
-                        isdeleted = true;
-                    }
-                }
-                if (isdeleted) {
                     user.destroy()
                         .then(() => {
                             res.status(200).json({ message: "L'utilisateur a bien été supprimé !" })
-                        }).catch((error) => {
+                        })
+                        .catch((error) => {
                             res.status(400).json({ message: "L'utilisateur n'a pas été supprimé !" })
                         });
+
                 }
-                else {
-                    res.status(400).json({ message: "L'avatar n'a pas été supprimé !" })
-                }
+
             }
             else {
                 res.status(403).json({ message: "Action non autorisée !" })

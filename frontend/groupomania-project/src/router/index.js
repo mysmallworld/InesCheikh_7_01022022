@@ -36,11 +36,6 @@ const routes = [
     name: 'updatePost',
     component: () => import('../components/update-post.vue')
   },
-  {
-    path: '/',
-    name: 'commentPost',
-    component: () => import('../components/new-comment.vue')
-  }
 ]
 
 const router = createRouter({

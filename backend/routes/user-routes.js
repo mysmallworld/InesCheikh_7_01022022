@@ -9,7 +9,7 @@ router.post('/signup', multer, userCtrl.signup);
 router.post('/login', userCtrl.login);
 router.get('/user', auth, userCtrl.getUser);
 router.put('/:id', auth, multer, userCtrl.updateUser);
-router.delete('/:id', auth, userCtrl.deleteUser);
+router.delete('/:id', auth, multer, userCtrl.deleteUser);
 
 //Export router from user.js file
 module.exports = router;

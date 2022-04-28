@@ -46,8 +46,40 @@
             <p class="my-auto text-secondary font-btn">Je n'aime pas</p>
             </div>
         </div>
-        <NewComment v-show='newcomment'/>
-        <Comments/>
+        <div class="comment" v-show='newcomment'>
+            <div class="d-flex flex-row align-items-center py-2">
+                <img :src="user.avatar" alt="avatar" class="img-fluid border rounded-circle comment-avatar me-1"/>
+             <div class="position-relative w-100 d-flex flex-row">
+                <textarea v-model="comment.comment" placeholder="Écrivez un commentaire..." 
+                class="form-control border rounded-pill comment-textarea overflow-auto"></textarea>
+                <i class="bi bi-send-check position-absolute end-0 pe-2 py-2 comment-send" @click="postedComment(comment)"></i>
+            </div>
+            </div>
+        </div>
+        <div class="comments">
+            <div class="pt-3 pb-1" v-for="comment in posts" v-bind:key="comment.id" :postId="post.id">
+            <div class="d-flex flex-row me-2">
+                <img :src="comment.User.avatar" alt="avatar" class="img-fluid border rounded-circle comment-avatar"/>
+            <div class="card w-100 comment-card ms-1 px-1">
+                <div class="d-flex flex-row mt-1">
+                    <p class="ms-2 me-1 fs-6 my-auto fw-bold font-title">{{comment.User.firstname}}</p>
+                    <p class="fs-6 my-auto fw-bold font-title">{{comment.User.lastname}}</p>
+                </div>
+                <textarea class="px-2 comment-card" v-model="comment.comment" 
+                v-if="comment.User.lastname == user.lastname || user.admin == true"></textarea>
+                <p class="px-2 comment-card" v-else>{{omment.comment}}</p>
+            </div>
+            </div>
+            <div class="d-flex flex-row" v-if="comment.User.lastname == user.lastname || user.admin == true">
+                <a class="ms-5 comment-update" @click="updateComment(comment)">modifier</a>
+                <a class="mx-2 comment-delete" @click="deleteComment(comment)">supprimer</a>
+                <p class="ms-2 fs-6 comment-time">{{dateTime(comment.createdAt, comment.updatedAt)}}</p>
+            </div>
+            <div v-else>
+                <p class="ms-5 fs-6 comment-time">{{dateTime(comment.createdAt, comment.updatedAt)}}</p>
+            </div>
+        </div>
+        </div>        
         </div>
         </div>
     </div>
@@ -56,20 +88,18 @@
 </template>
 
 <script>
-import NewComment from "./new-comment.vue"
-import Comments from "./all-comments.vue"
 import axios from "axios"
 import moment from "moment"
 
 export default {
-    components: {
-      NewComment,
-      Comments,
-    },
     data() {
       return {
           user: "",
           posts:[],
+          Comments:[],
+          comment: { 
+                comment:'',
+            },
           newcomment: false
       };
     },
@@ -95,6 +125,44 @@ methods: {
         if(updatedAt != createdAt)return `Modifié le ${moment(updatedAt).format('D MMMM YYYY, LT')}`
         else return moment(createdAt).format('D MMMM YYYY, LT');
     },
+     postedComment() {
+        let fd = new FormData();
+        fd.append('comment', this.comment),
+        fd.append('postId', this.postId),
+        console.log(this.postId)
+    axios
+        .post("http://localhost:3000/api/comment/", fd, {
+                headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
+            })
+            .then((response) => (this.comment = response.data.comment,
+            this.$router.go()))
+            .catch((err) => console.log(err));
+        },
+    date(createdAt, updatedAt) {   
+        moment.locale('fr')
+        if(updatedAt != createdAt) return `Mise à jour ${moment(updatedAt).fromNow()}`; 
+        else return moment(createdAt).fromNow();    
+    },
+    updateComment(comment) {
+        let fd = new FormData();
+        fd.append('comment', this.comment.comment)
+        
+    axios
+      .put("http://localhost:3000/api/comment/" +comment.id, fd, {
+            headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
+        })
+        .then((response) => (console.log(response)))
+        .catch((err) => console.log(err));
+    },
+    deleteComment(comment) {
+    axios
+        .delete("http://localhost:3000/api/comment/" +comment.id, {
+        headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+        })
+        .then((response) => (this.comment = response.data.comment, 
+        this.$router.go()))
+        .catch((err) => console.log(err));
+    },
     deletePost(post) {
     axios
         .delete("http://localhost:3000/api/post/" +post.id, {
@@ -104,6 +172,5 @@ methods: {
         this.$router.go()))
         .catch((err) => console.log(err));
     }
-}
-}
+}}
 </script>
