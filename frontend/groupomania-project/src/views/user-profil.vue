@@ -45,7 +45,7 @@
             <div class="py-4 px-4 mb-2">
                 <h4 id="bio" class="mb-3">Biographie</h4>
                 <div class="p-4 rounded shadow-sm bg-light">
-                <p v-if="user.bio">{{user.bio}}</p>
+                <p v-if="user.bio != null || user.bio != undefined">{{user.bio}}</p>
                 <p class="text-muted text-center mb-0" v-else>
                   Ajoutez une biographie à votre profil en appuyant sur<br> "Modifier le profil"</p>
                 </div>

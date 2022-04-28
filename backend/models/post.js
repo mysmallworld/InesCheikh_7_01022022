@@ -34,9 +34,9 @@ module.exports = (sequelize, DataTypes) => {
       }, onDelete: 'CASCADE'
     });
 
-    //  models.Post.hasMany(models.Comment);
-    //  models.Post.hasMany(models.Like);
-    // models.Post.hasMany(models.Dislike);
+    models.Post.hasMany(models.Comment);
+    models.Post.hasMany(models.Likes);
+    models.Post.hasMany(models.Dislikes);
   };
 
   return Post;

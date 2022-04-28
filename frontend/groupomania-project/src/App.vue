@@ -208,5 +208,25 @@ input, .link {
 }
 .comment-send:hover {
     color: #1328a1;
-  }
+}
+.comment-update, .comment-delete, .comment-time {
+  color:#5D5F63;
+  text-decoration: none;
+}
+.comment-update:hover {
+  color: #1328a1b4;
+}
+.comment-delete:hover {
+  color: #ec3e1ba8;
+}
+.comment-card {
+  background:#EEF0F3;
+  border-radius: 15px;
+  border: none;
+}
+//------------LIKES/DISLIKES------------
+.likes-btn:hover, .comment-btn:hover, .dislikes-btn:hover {
+  background: #EEF0F3;
+}
+
 </style>

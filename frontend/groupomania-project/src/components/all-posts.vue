@@ -17,7 +17,7 @@
                 <i class="bi bi-sliders" data-bs-toggle="dropdown" aria-expanded="false"></i>
                 <ul class="dropdown-menu rounded shadow-sm border-light text-center">
                     <li><a class="dropdown-item rounded font-btn btn-post-update">
-                        <router-link :to=" {name: 'updatePost'}" @click="GetPost(post)">Modifier le post</router-link></a></li>
+                        <router-link :to=" {name: 'updatePost', params:{id:post.id}}">Modifier le post</router-link></a></li>
                     <li><a class="dropdown-item rounded font-btn btn-post-delete" @click="deletePost(post)">Supprimer le post</a></li>
                 </ul>
             </div>
@@ -26,27 +26,62 @@
             <h1 class="d-flex justify-content-center font-title fw-bold fs-3">{{post.title}}</h1>
             <img :src="post.imageURL" class="img-fluid rounded shadow-sm w-100">
             <h2 class="py-2 px-4 fs-4">{{post.content}}</h2>
-        <div class="d-flex flex-row">
-        <div class="card-body d-flex flex-row border-bottom p-0 my-2">
-            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like"></i>
-            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike"></i>
+        <div class="d-flex flex-row bd-highlight">
+        <div class="card-body d-flex flex-row border-bottom p-0 col">
+            <div v-if="post.Dislikes !== null"><i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like">{{post.Likes}}</i></div>
+            <div v-if="post.Dislikes !== null"><i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike">{{post.Dislikes}}</i></div>
+       </div>
+        
         </div>
-        </div>
-        <div class="d-flex flex-row d-flex justify-content-between ms-auto py-1">
-            <div class="d-flex justify-content-between">
-            <i class="bi bi-hand-thumbs-up mx-1 my-auto text-primary"></i>
-            <p class="my-auto text-primary font-btn">J'aime</p>
+        <div class="d-flex flex-row col border-bottom">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 likes-btn" @click="likePost">
+            <i class="bi bi-hand-thumbs-up mx-1 my-auto text-secondary"></i>
+            <p class="my-auto text-secondary font-btn">J'aime</p>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 comment-btn" @click='newcomment = !newcomment'>
             <i class="bi bi-chat-dots mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">Commenter</p>
             </div>
-            <div class="d-flex justify-content-between">
-            <i class="bi bi-hand-thumbs-down mx-1 my-auto text-danger"></i>
-            <p class="my-auto text-danger font-btn">Je n'aime pas</p>
+            <div class="d-flex justify-content-center rounded col w-100 py-2 dislikes-btn" @click="dislikePost">
+            <i class="bi bi-hand-thumbs-down mx-1 my-auto text-secondary"></i>
+            <p class="my-auto text-secondary font-btn">Je n'aime pas</p>
             </div>
         </div>
-        <CommentPost/>
+
+        <div class="comment" v-show='newcomment'>
+            <div class="d-flex flex-row align-items-center py-2">
+                <img :src="user.avatar" alt="avatar" class="img-fluid border rounded-circle comment-avatar me-1"/>
+             <div class="position-relative w-100 d-flex flex-row">
+                <textarea v-model="comment.comment" placeholder="Écrivez un commentaire..." 
+                class="form-control border rounded-pill comment-textarea overflow-auto"></textarea>
+                <i class="bi bi-send-check position-absolute end-0 pe-2 py-2 comment-send" @click="postedComment(comment)"></i>
+            </div>
+            </div>
+        </div>
+        <div class="comments">
+            <div class="pt-3 pb-1" v-for="comment in post" v-bind:key="comment.id" :postId="post.id">
+            <div class="d-flex flex-row me-2">
+                <img :src="comment.avatar" alt="avatar" class="img-fluid border rounded-circle comment-avatar"/>
+            <div class="card w-100 comment-card ms-1 px-1">
+                <div class="d-flex flex-row mt-1">
+                    <p class="ms-2 me-1 fs-6 my-auto fw-bold font-title">{{comment.firstname}}</p>
+                    <p class="fs-6 my-auto fw-bold font-title">{{comment.lastname}}</p>
+                </div>
+                <textarea class="px-2 comment-card" v-model="post.comment" 
+                v-if="comment.lastname == user.lastname || user.admin == true"></textarea>
+                <p class="px-2 comment-card" v-else>{{post.comment}}</p>
+            </div>
+            </div>
+            <div class="d-flex flex-row" v-if="comment.lastname == user.lastname || user.admin == true">
+                <a class="ms-5 comment-update" @click="updateComment(comment)">modifier</a>
+                <a class="mx-2 comment-delete" @click="deleteComment(comment)">supprimer</a>
+                <p class="ms-2 fs-6 comment-time">{{dateTime(comment.createdAt, comment.updatedAt)}}</p>
+            </div>
+            <div v-else>
+                <p class="ms-5 fs-6 comment-time">{{dateTime(comment.createdAt, comment.updatedAt)}}</p>
+            </div>
+        </div>
+        </div>        
         </div>
         </div>
     </div>
@@ -55,17 +90,16 @@
 </template>
 
 <script>
-import CommentPost from "./new-comment.vue"
 import axios from "axios"
 import moment from 'moment'
 export default {
-    components: {
-      CommentPost,
-    },
     data() {
       return {
           user: "",
           posts:[],
+          post:[],
+            comment: "",
+          newcomment: false
       };
     },
     created() {
@@ -88,26 +122,78 @@ methods: {
     //Méthode pour formater le temps  de création ou de mise à jour des posts
     dateTime(createdAt, updatedAt) {   
         moment.locale('fr')
-        if(updatedAt != createdAt)return moment(updatedAt).format('D MMMM YYYY, LT')
+        if(updatedAt != createdAt)return `Mise à jour le: ${moment(updatedAt).format('D MMMM YYYY, LT')}`
         else return moment(createdAt).format('D MMMM YYYY, LT');
     },
-    GetPost(post) {
+
+    postedComment() {
+        let fd = new FormData();
+        fd.append('comment', this.comment),
+        fd.append('postId', this.postId),
+        console.log(this.postId)
     axios
-      .get("http://localhost:3000/api/post/" +post.id, {
-            headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+        .post("http://localhost:3000/api/comment/", fd, {
+                headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
+            })
+            .then((response) => (this.comment = response.data.comment,
+            this.$router.go()))
+            .catch((err) => console.log(err));
+        }
+    },
+    dateTime(createdAt, updatedAt) {   
+        moment.locale('fr')
+        if(updatedAt != createdAt) return `Mise à jour ${moment(updatedAt).fromNow()}`; 
+        else return moment(createdAt).fromNow();    
+    },
+    updateComment(comment) {
+        let fd = new FormData();
+        fd.append('comment', this.comment.comment)
+        
+    axios
+      .put("http://localhost:3000/api/comment/" +comment.id, fd, {
+            headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
         })
-        .then((response) => (this.post = response.data.post))
+        .then((response) => (console.log(response)))
         .catch((err) => console.log(err));
     },
+    deleteComment(comment) {
+    axios
+        .delete("http://localhost:3000/api/comment/" +comment.id, {
+        headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+        })
+        .then((response) => (this.comment = response.data.comment, 
+        this.$router.go()))
+        .catch((err) => console.log(err));
+    },
+
+    likePost(post) {
+        axios
+         .post("http://localhost:3000/api/post/" +post.id+"/likes", {
+                headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+            })
+            .then((response) => (this.post = response.data.post,
+            this.$router.go()))
+            .catch((err) => console.log(err));
+    },
+
+    dislikePost(post) {
+        axios
+         .post("http://localhost:3000/api/post/" +post.id+"/dislikes", {
+                headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+            })
+            .then((response) => (this.post = response.data.post,
+            this.$router.go()))
+            .catch((err) => console.log(err));
+    },
+
     deletePost(post) {
     axios
         .delete("http://localhost:3000/api/post/" +post.id, {
         headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
         })
-        .then((response) => (this.post = response.data.post, 
-        this.$router.go()))
+        .then((response) => (this.post = response.data.post))
+        this.$router.go()
         .catch((err) => console.log(err));
     }
-}
 }
 </script>

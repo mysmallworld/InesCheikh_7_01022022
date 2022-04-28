@@ -32,7 +32,7 @@ const routes = [
     component: () => import('../components/edit-profil.vue')
   },
   {
-    path: '/updatePost',
+    path: '/updatePost/:id',
     name: 'updatePost',
     component: () => import('../components/update-post.vue')
   },

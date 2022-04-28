@@ -1,7 +1,7 @@
 <template>
 <div class="post">
     <Nav/>
-<div class="container pt-2" v-for="post in posts" :key="post.id">
+<div class="container pt-2">
     <div class="card col-md-8 col-lg-6 mx-auto">
         <div class="d-flex flex-row border-bottom pb-4">
             <h2 class="d-flex justify-content-center w-100 position-absolute mt-2 pt-2 fs-4 font-title">Modifier une publication</h2>
@@ -49,45 +49,46 @@ export default {
 data() {
       return {
           user: "",
+          post:"",
           posts:[],
-          newPost:{
-              title: "",
-              content: "",
-              newImageUrl: "",
-          },
           selectedFile: null,
           selectFileName: ""
       };
 },
- created(){
+ created() {
     axios
       .get("http://localhost:3000/api/auth/user", {
             headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
         })
         .then((response) => (this.user = response.data.user))
         .catch((err) => console.log(err));
-},
+    axios
+      .get("http://localhost:3000/api/post/" +this.$route.params.id, {
+            headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+        })
+        .then((response) => (this.post = response.data.post))
+        .catch((err) => console.log(err));
 
+},
 methods: {
     onFileSelected(event) {
         this.selectedFile = event.target.files[0];
         this.name = event.target.files[0].name;
         this.selectFileName = 'Le fichier "' + this.name + '" a été sélectionné.';
     }, 
-    updatePost(post) {
+    updatePost(post) {  
         let fd = new FormData();
         fd.append('image', this.selectedFile),
-        fd.append('title',this.newPost.title),
-        fd.append('content',this.newPost.content)
-        
+        fd.append('title', post.title),
+        fd.append('content', post.content),
+
     axios
         .put("http://localhost:3000/api/post/" +post.id, fd, {
         headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
         })
-        .then((response) => (this.newPost = response.data.newPost,
-        this.$router.push({name: 'home'}).$router.go()))
+        .then((response) => ( console.log(response),
+        this.$router.push({name: 'home'})))
         .catch((err) => console.log(err));
-         
     },
     close() {
       this.$router.push({name: 'home'});

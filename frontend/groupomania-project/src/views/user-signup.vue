@@ -95,7 +95,7 @@ export default {
           console.log(res);
           })
           .catch((error) => { 
-            this.error = "Une erreur est survenue, chaque utilisateur doit avoir un nom unique !"
+            this.error = "Une erreur est survenue, chaque utilisateur doit avoir un email et un nom unique !"
             console.log(error)})
       },
       btnConnect() {

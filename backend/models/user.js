@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     email: {
       type: DataTypes.STRING,
+      unique: true,
       allowNull: false,
       validate: {
         notNull: { msg: 'User must have a email' },
@@ -62,8 +63,8 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     models.User.hasMany(models.Post);
     models.User.hasMany(models.Comment);
-    // models.User.hasMany(models.Like);
-    // models.Post.hasMany(models.Dislike);
+    models.User.hasMany(models.Likes);
+    models.Post.hasMany(models.Dislikes);
 
   };
 

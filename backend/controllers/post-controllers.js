@@ -54,7 +54,27 @@ exports.getOnePost = async (req, res) => {
 		include: [{
 			model: model.User,
 			attributes: ["avatar", "lastname", "firstname"]
-		}]
+		},
+		{
+			model: model.Likes,
+			attributes: [ 'postId', 'userId' ]
+		},
+		{
+			model: model.Dislikes,
+			attributes: [ 'postId', 'userId' ]
+		},
+		{
+			model: model.Comment,
+
+			attributes: ["id", "comment", "updatedAt", "createdAt", "UserId", "PostId"],
+			include: [
+				{
+					model: model.User,
+					attributes: ["avatar", "lastname", "firstname"]
+				}
+			]
+		}
+		]
 	})
 		.then((post) => {
 			if (post) {
@@ -75,7 +95,27 @@ exports.getAllPost = async (req, res) => {
 		attributes: ["id", "title", "content", "imageURL", "createdAt", "updatedAt"],
 		include: [{
 			model: model.User, attributes: ["avatar", "lastname", "firstname"]
-		}],
+		},
+		{
+			model: model.Likes,
+			attributes: [ 'postId', 'userId' ]
+		},
+		{
+			model: model.Dislikes,
+			attributes: [ 'postId', 'userId' ]
+		},
+		{
+			model: model.Comment,
+
+			attributes: ["id", "comment",  "updatedAt", "createdAt", "UserId", "PostId"],
+			include: [
+				{
+					model: model.User,
+					attributes: ["avatar", "lastname", "firstname"]
+				}
+			]
+		}
+		],
 	})
 		.then((posts) => {
 			if (posts) {
@@ -97,7 +137,27 @@ exports.getMyPost = async (req, res) => {
 		attributes: ["id", "title", "content", "imageURL", "createdAt", "updatedAt"],
 		include: [{
 			model: model.User, attributes: ["avatar", "lastname", "firstname"]
-		}],
+		},
+		{
+			model: model.Likes,
+			attributes: [ 'postId', 'userId' ]
+		},
+		{
+			model: model.Dislikes,
+			attributes: [ 'postId', 'userId' ]
+		},
+		{
+			model: model.Comment,
+
+			attributes: ["id", "comment",  "updatedAt", "createdAt", "UserId", "PostId"],
+			include: [
+				{
+					model: model.User,
+					attributes: ["avatar", "lastname", "firstname"]
+				}
+			]
+		}
+		],
 	})
 		.then((posts) => {
 			if (posts) {
@@ -149,11 +209,13 @@ exports.updatePost = async (req, res) => {
 					});
 				}
 			}
-			post.content = req.body.content;
-			post.title = req.body.title;
-			post.imageURL = newImageUrl;
+			const postObject = {
+				content: req.body.content,
+				title: req.body.title,
+				imageURL: newImageUrl,
+			}
 
-			const newPost = await post.update({
+			const newPost = await post.update(postObject, {
 				fields: ['content', 'title', 'imageURL']
 			})
 				.then((response) => {

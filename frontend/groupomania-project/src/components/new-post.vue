@@ -7,6 +7,9 @@
             <h2 class="d-flex justify-content-center w-100 position-absolute mt-2 pt-2 fs-4 font-title">Créer une publication</h2>
             <i class="bi bi-x-circle-fill fs-4 ms-auto me-1 close-post" @click="close()"></i>
         </div>
+        <div class="alert alert-danger py-3 mx-2 mt-2 text-center" role="alert" v-if="error">
+            {{error}}
+        </div>
         <div class="d-flex flex-row py-2">
             <img :src="user.avatar" alt="avatar" class="img-fluid border rounded-circle avatar mx-2"/>
             <p class="ms-2 me-1 fs-6 my-auto fw-bold font-title">{{user.firstname}}</p>
@@ -49,7 +52,8 @@ name: 'user-profil',
             content: '',
         },
         selectedFile: null,
-        selectFileName: ""
+        selectFileName: "",
+        error:'',
       };
     },
     created() {
@@ -77,9 +81,11 @@ methods: {
         .post("http://localhost:3000/api/post/", fd, {
         headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
         })
-        .then((response) => (this.newPost = response.data.newPost, 
+        .then((response) => (console.log(response), 
         this.$router.push({name: 'home'}).$router.go()))
-        .catch((err) => console.log(err), {error: alert("Chaque post doit avoir un titre et un contenu !")});
+        .catch((error) => { 
+            this.error = "Chaque post doit avoir un titre et un contenu !"
+            console.log(error)});
     },
     close() {
       this.$router.push({name: 'home'});

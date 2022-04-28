@@ -35,17 +35,15 @@
             <div class="py-4 px-4 mb-2">
             <h4 id="info" class="mb-3">Infos</h4>
             <div class="rounded shadow-sm bg-light">
-              <div class="px-4 pt-4 d-flex flex-row">
-                <i class="bi bi-envelope info-icons"></i> 
-                <p class="text-muted mx-auto"><textarea v-model="user.email" placeholder="Email" class="form-control textarea w-100 h-50 text-center"></textarea></p>
+              <div class="px-4 pt-3 d-flex flex-row">
+                <i class="bi bi-envelope info-icons"></i>
+                  <p class="text-center text-muted mx-auto">{{user.email}}</p>
               </div>
-              <div class="px-4 py-2 d-flex flex-row">
+              <div class="px-4 py-3 d-flex flex-row">
                 <i class="bi bi-lock info-icons"></i>
-                <div class="mx-auto text-center">
-                <p class="text-muted mb-0">*****</p>
-                <p class="text-muted fs-6">Par sécurité, le mot de passe ne peut pas être modifié</p>
-                </div>
+                  <p class="mx-auto text-center text-muted mb-0">*****</p>
               </div>
+              <p class="text-center text-muted fs-6 pb-2 px-3">Par sécurité, l'email et le mot de passe ne peuvent pas être modifiés</p>
             </div>
           </div>
 

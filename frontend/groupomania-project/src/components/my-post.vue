@@ -27,25 +27,27 @@
             <img :src="post.imageURL" alt="image post" class="img-fluid rounded shadow-sm w-100">
             <h2 class="py-2 px-4 fs-4">{{post.content}}</h2>
         <div class="d-flex flex-row">
-        <div class="card-body d-flex flex-row border-bottom p-0 my-2">
-            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like"></i>
-            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike"></i>
+        <div class="card-body d-flex flex-row border-bottom p-0">
+            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-for="likes in posts" :key="likes.id"></i>
+            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike" v-for="dislikes in posts" :key="dislikes.id"></i>
         </div>
         </div>
-        <div class="d-flex flex-row d-flex justify-content-between ms-auto py-1">
-            <div class="d-flex justify-content-between">
-            <i class="bi bi-hand-thumbs-up mx-1 my-auto text-primary"></i>
-            <p class="my-auto text-primary font-btn">J'aime</p>
+        <div class="d-flex flex-row col border-bottom">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 likes-btn" @click="likePost">
+            <i class="bi bi-hand-thumbs-up mx-1 my-auto text-secondary"></i>
+            <p class="my-auto text-secondary font-btn">J'aime</p>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 comment-btn" @click='newcomment = !newcomment'>
             <i class="bi bi-chat-dots mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">Commenter</p>
             </div>
-            <div class="d-flex justify-content-between">
-            <i class="bi bi-hand-thumbs-down mx-1 my-auto text-danger"></i>
-            <p class="my-auto text-danger font-btn">Je n'aime pas</p>
+            <div class="d-flex justify-content-center rounded col w-100 py-2 dislikes-btn" @click="dislikePost">
+            <i class="bi bi-hand-thumbs-down mx-1 my-auto text-secondary"></i>
+            <p class="my-auto text-secondary font-btn">Je n'aime pas</p>
             </div>
         </div>
+        <NewComment v-show='newcomment'/>
+        <Comments/>
         </div>
         </div>
     </div>
@@ -54,14 +56,21 @@
 </template>
 
 <script>
+import NewComment from "./new-comment.vue"
+import Comments from "./all-comments.vue"
 import axios from "axios"
 import moment from "moment"
 
 export default {
+    components: {
+      NewComment,
+      Comments,
+    },
     data() {
       return {
           user: "",
           posts:[],
+          newcomment: false
       };
     },
     created() {
