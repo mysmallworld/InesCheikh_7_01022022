@@ -75,7 +75,7 @@
             </div>
             </div>
             <div class="d-flex flex-row" v-if="comment.User.lastname == user.lastname || user.admin == true">
-                <a class="ms-5 comment-update" @click="updateComment(comment, postId)">modifier</a>
+                <a class="ms-5 comment-update" @click="updateComment(comment, comment.id, postId)">modifier</a>
                 <a class="mx-2 comment-delete" @click="deleteComment(comment, postId)">supprimer</a>
                 <p class="ms-2 fs-6 comment-time">{{dateFromNow(comment.createdAt, comment.updatedAt)}}</p>
             </div>
@@ -162,13 +162,14 @@ methods: {
 
     updateComment(comment) {
         let fd = new FormData();
-        fd.append('comment', this.comment)
+        fd.append('comment', comment.comment);
         
     axios
       .put("http://localhost:3000/api/comment/" +comment.id, fd, {
             headers: { Authorization: "Bearer " +localStorage.getItem("authToken"),'Content-Type': 'multipart/form-data'}, 
         })
-        .then((response) => (console.log(response)))
+        .then((response) => (this.comment = response.data.comment,
+        this.$router.go()))
         .catch((err) => console.log(err));
     },
 
