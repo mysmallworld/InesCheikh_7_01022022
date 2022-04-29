@@ -24,7 +24,7 @@
         </div>
         
             <h1 class="d-flex justify-content-center font-title fw-bold fs-3">{{post.title}}</h1>
-            <img :src="post.imageURL" alt="image post" class="img-fluid rounded shadow-sm w-100">
+            <img :src="post.imageURL" class="img-fluid rounded shadow-sm w-100">
             <h2 class="pb-4 pt-3 px-4 fs-5">{{post.content}}</h2>
         <div class="d-flex flex-row">
         <div class="card-body d-flex flex-row border-bottom p-0">
@@ -33,7 +33,7 @@
         </div>
         </div>
         <div class="d-flex flex-row col border-bottom">
-            <div class="d-flex justify-content-center rounded col w-100 py-2 likes-btn" @click="likePost">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 likes-btn" @click="likePost(post, user, post.id)">
             <i class="bi bi-hand-thumbs-up mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">J'aime</p>
             </div>
@@ -41,7 +41,7 @@
             <i class="bi bi-chat-dots mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">Commenter</p>
             </div>
-            <div class="d-flex justify-content-center rounded col w-100 py-2 dislikes-btn" @click="dislikePost">
+            <div class="d-flex justify-content-center rounded col w-100 py-2 dislikes-btn" @click="dislikePost(post, user, post.id)">
             <i class="bi bi-hand-thumbs-down mx-1 my-auto text-secondary"></i>
             <p class="my-auto text-secondary font-btn">Je n'aime pas</p>
             </div>
@@ -174,21 +174,20 @@ methods: {
         .catch((err) => console.log(err));
     },
 
-
-    likePost(post) {
+    likePost(post, user) {
         axios
-         .post("http://localhost:3000/api/post/" + post.id+ "/likes", {
-                headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+         .post("http://localhost:3000/api/post/" +post.id+ "/likes", user, {
+            headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
             })
-            .then((response) => ( console.log(response),this.Likes = response.data.Likes,
+            .then((response) => (this.Likes = response.data.Likes,
             this.$router.go()))
             .catch((err) => console.log(err));
     },
 
-    dislikePost(post) {
+    dislikePost(post, user) {
         axios
-         .post("http://localhost:3000/api/post/" + post.id+ "/dislikes", {
-                headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+         .post("http://localhost:3000/api/post/" +post.id+ "/dislikes", user, {
+            headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
             })
             .then((response) => (this.Dislikes = response.data.Dislikes,
             this.$router.go()))

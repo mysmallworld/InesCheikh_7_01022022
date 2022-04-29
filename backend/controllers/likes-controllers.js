@@ -14,8 +14,12 @@ exports.likesPost = async (req, res) => {
         const post = await model.Post.findOne({
             where: { id: req.params.id },
         });
-
-        if (post != null && post.id == req.params.id) {
+        const user = await model.User.findOne({
+			attributes: ['firstName', 'lastName', 'id', 'avatar'],
+			where: { id: userId }
+		});
+        
+        if (post != null && post.id == req.params.id && user != null) {
 
             const isLiked = await model.Likes.findOne({
                 where: { postId: post.id, userId: userId }
@@ -72,8 +76,12 @@ exports.dislikesPost = async (req, res) => {
         const post = await model.Post.findOne({
             where: { id: req.params.id },
         });
+        const user = await model.User.findOne({
+			attributes: ['firstName', 'lastName', 'id', 'avatar'],
+			where: { id: userId }
+		});
 
-        if (post != null && post.id == req.params.id) {
+        if (post != null && post.id == req.params.id && user != null) {
 
             const isLiked = await model.Likes.findOne({
                 where: { postId: post.id, userId: userId }
