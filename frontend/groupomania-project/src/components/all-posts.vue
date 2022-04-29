@@ -28,8 +28,8 @@
             <h2 class="pb-4 pt-3 px-4 fs-5">{{post.content}}</h2>
         <div class="d-flex flex-row bd-highlight">
         <div class="card-body d-flex flex-row border-bottom p-0 col">
-            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-if="post.Likes != 0">{{post.Likes}}</i>
-            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 text-danger dislike" v-if="post.Dislikes != 0">{{post.Dislikes}}</i>
+            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-if="post.Likes != 0">{{post.Likes.length}}</i>
+            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 text-danger dislike" v-if="post.Dislikes != 0">{{post.Dislikes.length}}</i>
        </div>
         <!-- Likes/Comment/Dislikes -->
         </div>
