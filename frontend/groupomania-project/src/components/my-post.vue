@@ -18,7 +18,7 @@
                 <ul class="dropdown-menu rounded shadow-sm border-light text-center">
                     <li><a class="dropdown-item rounded font-btn btn-post-update">
                         <router-link :to=" {name: 'updatePost', params: { id: post.id }}">Modifier le post</router-link></a></li>
-                    <li><a class="dropdown-item rounded font-btn btn-post-delete" @click="deletePost(post)">Supprimer le post</a></li>
+                    <li><a class="dropdown-item rounded font-btn btn-post-delete" @click="deletePost(post, post.id)">Supprimer le post</a></li>
                 </ul>
             </div>
         </div>
@@ -28,8 +28,8 @@
             <h2 class="py-2 px-4 fs-4">{{post.content}}</h2>
         <div class="d-flex flex-row">
         <div class="card-body d-flex flex-row border-bottom p-0">
-            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-for="likes in posts" :key="likes.id"></i>
-            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 position-absolute text-danger dislike" v-for="dislikes in posts" :key="dislikes.id"></i>
+            <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-if="post.Likes != 0">{{post.Likes}}</i>
+            <i class="bi bi-hand-thumbs-down-fill me-1 mb-1 px-1 text-danger dislike" v-if="post.Dislikes != 0">{{post.Dislikes}}</i>
         </div>
         </div>
         <div class="d-flex flex-row col border-bottom">
@@ -172,6 +172,27 @@ methods: {
         .then((response) => (this.post = response.data.post,
         this.$router.go()))
         .catch((err) => console.log(err));
+    },
+
+
+    likePost(post) {
+        axios
+         .post("http://localhost:3000/api/post/" + post.id+ "/likes", {
+                headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+            })
+            .then((response) => ( console.log(response),this.Likes = response.data.Likes,
+            this.$router.go()))
+            .catch((err) => console.log(err));
+    },
+
+    dislikePost(post) {
+        axios
+         .post("http://localhost:3000/api/post/" + post.id+ "/dislikes", {
+                headers: { Authorization: "Bearer " +localStorage.getItem("authToken")}, 
+            })
+            .then((response) => (this.Dislikes = response.data.Dislikes,
+            this.$router.go()))
+            .catch((err) => console.log(err));
     }
 }}
 </script>

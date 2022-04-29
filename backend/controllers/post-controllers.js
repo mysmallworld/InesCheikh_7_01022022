@@ -244,14 +244,15 @@ exports.deletePost = async (req, res) => {
 
 		let checkAdmin = await model.User.findOne({ where: { id: userId } });
 		let post = await model.Post.findOne({ where: { id: req.params.id } });
-
-		if (userId === post.userId || checkAdmin.admin === true) {
-			if (post.imageUrl) {
-				const filename = post.imageUrl.split('/images/')[1];
+		
+		if (userId == post.userId || checkAdmin.admin == true ) {
+			if (post.imageURL) {
+				const filename = post.imageURL.split('/images/')[1];
 				fs.unlink(`images/${filename}`, () => {
+					console.log("image supprimée");
 				});
 			}
-			model.Post.destroy({ where: { id: post.id } })
+			model.Post.destroy({ where: { id: req.params.id }})
 				.then(() => res.status(200).json({ message: "Ce post a bien été supprimé !" }))
 				.catch((error) => {
 					console.log(error.message);
