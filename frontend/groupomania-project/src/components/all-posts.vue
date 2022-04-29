@@ -14,7 +14,7 @@
                 </div>
             <p class="ms-2 fs-6">{{dateTime(post.createdAt, post.updatedAt)}}</p>
             </div>
-            <div class="btn-group dropstart ms-auto bd-highlight btn-update-post" v-if="post.User.lastname == user.lastname || user.admin == true">
+            <div class="btn-group dropstart ms-auto bd-highlight btn-update-post" v-if="post.User.lastname == user.lastname || user.admin === true">
                 <i class="bi bi-sliders" data-bs-toggle="dropdown" aria-expanded="false"></i>
                 <ul class="dropdown-menu rounded shadow-sm border-light text-center">
                     <li><a class="dropdown-item rounded font-btn btn-post-update">
@@ -70,7 +70,7 @@
                     <p class="fs-6 my-auto fw-bold font-title">{{comment.User.lastname}}</p>
                 </div>
                 <textarea class="px-2 comment-card" v-model="comment.comment" 
-                v-if="comment.User.lastname == user.lastname || user.admin == true"></textarea>
+                v-if="comment.User.lastname == user.lastname"></textarea>
                 <p class="px-2 comment-card" v-else>{{comment.comment}}</p>
             </div>
             </div>

@@ -105,7 +105,7 @@ exports.getUser = (req, res) => {
             if (user) {
                 res
                     .status(200)
-                    .json({ message: "Utilisateur trouvé !", user: { avatar: user.avatar, firstname: user.firstname, lastname: user.lastname, email: decryptEmail(user.email), bio: user.bio } });
+                    .json({ message: "Utilisateur trouvé !", user: { avatar: user.avatar, firstname: user.firstname, lastname: user.lastname, email: decryptEmail(user.email), bio: user.bio, admin: user.admin } });
             } else {
                 return res.status(404).json({ message: "Utilisateur introuvable !" });
             }
