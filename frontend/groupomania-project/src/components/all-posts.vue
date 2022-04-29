@@ -25,7 +25,7 @@
         </div>
             <h1 class="d-flex justify-content-center font-title fw-bold fs-3">{{post.title}}</h1>
             <img :src="post.imageURL" class="img-fluid rounded shadow-sm w-100">
-            <h2 class="py-2 px-4 fs-4">{{post.content}}</h2>
+            <h2 class="pb-4 pt-3 px-4 fs-5">{{post.content}}</h2>
         <div class="d-flex flex-row bd-highlight">
         <div class="card-body d-flex flex-row border-bottom p-0 col">
             <i class="bi bi-hand-thumbs-up-fill me-1 mb-1 px-1 text-primary like" v-if="post.Likes != 0">{{post.Likes}}</i>
